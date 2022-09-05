@@ -1,5 +1,9 @@
+import React from "react";
 import { useEffect } from "react"
+
 import * as THREE from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -46,9 +50,19 @@ export function App() {
     const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
     scene.add(boxMesh);
 
+    //Add Orbit Controls
+    const controls = new OrbitControls(camera, renderer.domElement)
+
+    //Add Fps Stats
+    const stats = Stats();
+    document.body.appendChild(stats.dom);
+
     const animate = () => {
-      boxMesh.rotation.x += 0.04;
-      boxMesh.rotation.y += 0.03;
+      // boxMesh.rotation.x += 0.001;
+      // boxMesh.rotation.y += 0.02;
+
+      stats.update();
+      controls.update();
 
 
       renderer.render(scene, camera);
