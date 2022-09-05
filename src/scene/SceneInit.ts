@@ -16,7 +16,7 @@ export class SceneInit {
   clock: THREE.Clock | undefined;
 
   constructor(canvasId: string) {
-    this.fov = 6;
+    this.fov = 96;
     this.canvasId = canvasId;
 
     this.scene = undefined;
