@@ -14,73 +14,89 @@ export class SceneInit {
   controls: any;
   renderer: any;
   clock: THREE.Clock | undefined;
+  nearPlane: number;
+  farPlane: number;
+  spotLight: undefined;
+  ambientLight: undefined;
 
   constructor(canvasId: string) {
-    this.fov = 96;
+    // NOTE: Core components to initialize Three.js app.
+    this.scene = undefined;
+    this.camera = undefined;
+    this.renderer = undefined;
+
+    // NOTE: Camera params;
+    this.fov = 45;
+    this.nearPlane = 1;
+    this.farPlane = 1000;
     this.canvasId = canvasId;
 
-    this.scene = undefined;
+    // NOTE: Additional components.
+    this.clock = undefined;
     this.stats = undefined;
-    this.camera = undefined;
     this.controls = undefined;
-    this.renderer = undefined;
+
+    // NOTE: Lighting is basically required.
+    this.spotLight = undefined;
+    this.ambientLight = undefined;
   }
 
   initialize() {
-    //set Camera
+    this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
       this.fov,
-      width / height,
+      window.innerWidth / window.innerHeight,
       1,
       1000
     );
-
     this.camera.position.z = 96;
-    this.clock = new THREE.Clock();
-    this.scene = new THREE.Scene();
 
-    //render canvas element
+    // NOTE: Specify a canvas which is already created in the HTML.
     const canvas = document.getElementById(this.canvasId)!;
-
     this.renderer = new THREE.WebGLRenderer({
       canvas,
+      // NOTE: Anti-aliasing smooths out the edges.
       antialias: true,
     });
-
-    //renderer sizes
-    this.renderer.setSize(width, height);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    // enable this for shadows
+    this.renderer.shadowMap.enabled = true;
     document.body.appendChild(this.renderer.domElement);
 
-    //Add Orbit Controls
+    this.clock = new THREE.Clock();
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    //Add Fps Stats
     this.stats = Stats();
     document.body.appendChild(this.stats.dom);
 
-    // Ambient Light
-    let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    ambientLight.castShadow = true;
-    this.scene.add(ambientLight);
+    // HIDE LIGHTING FOR DEMO.
+    // ambient light which is for the whole scene
+    // this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // this.ambientLight.castShadow = true;
+    // this.scene.add(this.ambientLight);
+    // spot light which is illuminating the chart directly
+    // this.spotLight = new THREE.SpotLight(0xffffff, 1);
+    // this.spotLight.castShadow = true;
+    // this.spotLight.position.set(0, 64, 32);
+    // this.scene.add(this.spotLight);
 
-    // Ambient Spot Light
-    let spotLight = new THREE.SpotLight(0xffffff, 1);
-    spotLight.castShadow = true;
-    spotLight.position.set(0, 64, 32);
-    this.scene.add(spotLight);
-
-    //if window resizes
+    // if window resizes
     window.addEventListener('resize', () => this.onWindowResize(), false);
-  }
 
-  onWindowResize() {
-    //resize window
-    width = window.innerWidth;
-    height = window.innerHeight;
+    // NOTE: Load space background.
+    // this.loader = new THREE.TextureLoader();
+    // this.scene.background = this.loader.load('./pics/space.jpeg');
+
+    // NOTE: Declare uniforms to pass into glsl shaders.
+    // this.uniforms = {
+    //   u_time: { type: 'f', value: 1.0 },
+    //   colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
+    //   colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
+    // };
   }
 
   animate() {
-    //animate and update
+    // NOTE: Window is implied.
+    // requestAnimationFrame(this.animate.bind(this));
     window.requestAnimationFrame(this.animate.bind(this));
     this.render();
     this.stats.update();
@@ -88,7 +104,14 @@ export class SceneInit {
   }
 
   render() {
-    //render camera and scene
+    // NOTE: Update uniform data on each render.
+    // this.uniforms.u_time.value += this.clock.getDelta();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 };
